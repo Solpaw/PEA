@@ -151,10 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="inputByHand.cpp" />
     <ClCompile Include="loadFromFile.cpp" />
     <ClCompile Include="PEA.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inputByHand.h" />
     <ClInclude Include="loadFromFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

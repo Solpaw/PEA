@@ -21,9 +21,15 @@
     <ClCompile Include="loadFromFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="inputByHand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="loadFromFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inputByHand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

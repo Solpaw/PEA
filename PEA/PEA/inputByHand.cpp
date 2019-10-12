@@ -1,27 +1,19 @@
-#include "loadFromFile.h"
 #include <iostream>
-#include <fstream>
-#include <string>
 #include <conio.h>
 using namespace std;
 
-void loadFromFileMenu()
-{
-	ifstream inFile;
-	inFile.open("./dane/test.txt");
-	if (inFile.fail()) {
-		cerr << "B³¹d otwarcia pliku!";
-		return;
-	}
-	system("cls");
-
-	string name;
+void inputByHand() {
+	
 	int nrOfPoints;
-	inFile >> name >> nrOfPoints;
-	cout << "Name: " << name << endl;
-
-	bool** adjectMatrix = new bool *[nrOfPoints];
-	int** weightMatrix = new int *[nrOfPoints];
+	system("cls");
+	cout << "Wprowadz ilosc punktow: ";
+	cin >> nrOfPoints;
+	while (nrOfPoints <= 1) {
+		cout << "Punktow musi byc wiecej niz 1: ";
+		cin >> nrOfPoints;
+	}
+	bool** adjectMatrix = new bool* [nrOfPoints];
+	int** weightMatrix = new int* [nrOfPoints];
 	for (int i = 0; i < nrOfPoints; i++) {
 		adjectMatrix[i] = new bool[nrOfPoints];
 		weightMatrix[i] = new int[nrOfPoints];
@@ -31,13 +23,19 @@ void loadFromFileMenu()
 		}
 	}
 
-	int cur;
+	int weigth;
 	for (int i = 0; i < nrOfPoints; i++) {
 		for (int j = 0; j < nrOfPoints; j++) {
-			inFile >> cur;
-			if (cur != -1) {
+			if (j != i) {
+				system("cls");
+				cout << "Wprowadz wage poloczenia miedzy punktami " << i+1 << " i " << j+1 << ": ";
+				cin >> weigth;
+				while (weigth <= 0) {
+					cout << "Wprowadz liczbe wieksza niz 0: ";
+					cin >> weigth;
+				}
 				adjectMatrix[i][j] = true;
-				weightMatrix[i][j] = cur;
+				weightMatrix[i][j] = weigth;
 			}
 		}
 	}
