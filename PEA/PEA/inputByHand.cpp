@@ -1,9 +1,12 @@
 #include <iostream>
 #include <conio.h>
+#include "showGraph.h"
+#include "targetFunction.h"
 using namespace std;
 
 void inputByHand() {
-	
+	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Zakoncz";
+
 	int nrOfPoints;
 	system("cls");
 	cout << "Wprowadz ilosc punktow: ";
@@ -12,13 +15,10 @@ void inputByHand() {
 		cout << "Punktow musi byc wiecej niz 1: ";
 		cin >> nrOfPoints;
 	}
-	bool** adjectMatrix = new bool* [nrOfPoints];
 	int** weightMatrix = new int* [nrOfPoints];
 	for (int i = 0; i < nrOfPoints; i++) {
-		adjectMatrix[i] = new bool[nrOfPoints];
 		weightMatrix[i] = new int[nrOfPoints];
 		for (int j = 0; j < nrOfPoints; j++) {
-			adjectMatrix[i][j] = false;
 			weightMatrix[i][j] = -1;
 		}
 	}
@@ -34,24 +34,31 @@ void inputByHand() {
 					cout << "Wprowadz liczbe wieksza niz 0: ";
 					cin >> weigth;
 				}
-				adjectMatrix[i][j] = true;
 				weightMatrix[i][j] = weigth;
 			}
 		}
 	}
 
-	for (int i = 0; i < nrOfPoints; i++) {
-		for (int j = 0; j < nrOfPoints; j++) {
-			cout << weightMatrix[i][j] << "  ";
+	bool exit = false;
+	while (!exit) {
+		system("cls");
+		cout << menu;
+		int choice = _getch();
+		switch (choice) {
+		case '1':
+			showGraph(nrOfPoints, weightMatrix);
+			break;
+		case '2':
+			calculateTarget(nrOfPoints, weightMatrix);
+			break;
+		case '3':
+			exit = true;
+			break;
 		}
-		cout << endl;
 	}
 
 	for (int i = 0; i < nrOfPoints; i++) {
-		delete[] adjectMatrix[i];
 		delete[] weightMatrix[i];
 	}
-	delete[]adjectMatrix;
 	delete[]weightMatrix;
-	_getch();
 }

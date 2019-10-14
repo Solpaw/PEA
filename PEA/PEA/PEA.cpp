@@ -3,6 +3,7 @@
 #include <conio.h>
 #include "loadFromFile.h"
 #include "inputByHand.h"
+#include "randomValues.h"
 using namespace std;
 
 void mainMenu() {
@@ -18,6 +19,7 @@ void mainMenu() {
 				loadFromFileMenu();
 				break;
 			case '2':
+				randomValuesMenu();
 				break;
 			case '3':
 				inputByHand();

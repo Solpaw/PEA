@@ -8,8 +8,7 @@
 using namespace std;
 
 
-void loadFromFileMenu()
-{
+void loadFromFileMenu() {
 	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Zakoncz";
 
 	ifstream inFile;
@@ -25,13 +24,10 @@ void loadFromFileMenu()
 	inFile >> name >> nrOfPoints;
 	cout << "Name: " << name << endl;
 
-	bool** adjectMatrix = new bool *[nrOfPoints];
 	int** weightMatrix = new int *[nrOfPoints];
 	for (int i = 0; i < nrOfPoints; i++) {
-		adjectMatrix[i] = new bool[nrOfPoints];
 		weightMatrix[i] = new int[nrOfPoints];
 		for (int j = 0; j < nrOfPoints; j++) {
-			adjectMatrix[i][j] = false;
 			weightMatrix[i][j] = -1;
 		}
 	}
@@ -41,7 +37,6 @@ void loadFromFileMenu()
 		for (int j = 0; j < nrOfPoints; j++) {
 			inFile >> cur;
 			if (cur != -1) {
-				adjectMatrix[i][j] = true;
 				weightMatrix[i][j] = cur;
 			}
 		}
@@ -66,9 +61,7 @@ void loadFromFileMenu()
 	}
 
 	for (int i = 0; i < nrOfPoints; i++) {
-		delete[] adjectMatrix[i];
 		delete[] weightMatrix[i];
 	}
-	delete[]adjectMatrix;
 	delete[]weightMatrix;
 }
