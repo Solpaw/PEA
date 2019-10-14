@@ -3,14 +3,19 @@
 #include <fstream>
 #include <string>
 #include <conio.h>
+#include "showGraph.h"
+#include "targetFunction.h"
 using namespace std;
+
 
 void loadFromFileMenu()
 {
+	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Zakoncz";
+
 	ifstream inFile;
-	inFile.open("./dane/test.txt");
+	inFile.open("./dane/data10.txt");
 	if (inFile.fail()) {
-		cerr << "B³¹d otwarcia pliku!";
+		cerr << "Blad otwarcia pliku!";
 		return;
 	}
 	system("cls");
@@ -42,11 +47,22 @@ void loadFromFileMenu()
 		}
 	}
 
-	for (int i = 0; i < nrOfPoints; i++) {
-		for (int j = 0; j < nrOfPoints; j++) {
-			cout << weightMatrix[i][j] << "  ";
+	bool exit = false;
+	while (!exit) {
+		system("cls");
+		cout << menu;
+		int choice = _getch();
+		switch (choice) {
+		case '1':
+			showGraph(nrOfPoints, weightMatrix);
+			break;
+		case '2':
+			calculateTarget(nrOfPoints, weightMatrix);
+			break;
+		case '3':
+			exit = true;
+			break;
 		}
-		cout << endl;
 	}
 
 	for (int i = 0; i < nrOfPoints; i++) {
@@ -55,5 +71,4 @@ void loadFromFileMenu()
 	}
 	delete[]adjectMatrix;
 	delete[]weightMatrix;
-	_getch();
 }

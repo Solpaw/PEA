@@ -8,7 +8,8 @@ using namespace std;
 void mainMenu() {
 	string menu = "1. Wczytaj z pliku\n2. Generuj losowo\n3. Wprowadz recznie\n4. Wyjdz";
 
-	while (true) {
+	bool exit = false;
+	while (!exit) {
 		system("cls");
 		cout << menu;
 		int userChoice = _getch();
@@ -22,7 +23,7 @@ void mainMenu() {
 				inputByHand();
 				break;
 			case '4':
-				return;
+				exit = true;
 				break;
 		}
 	}

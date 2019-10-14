@@ -154,10 +154,14 @@
     <ClCompile Include="inputByHand.cpp" />
     <ClCompile Include="loadFromFile.cpp" />
     <ClCompile Include="PEA.cpp" />
+    <ClCompile Include="showGraph.cpp" />
+    <ClCompile Include="targetFunction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inputByHand.h" />
     <ClInclude Include="loadFromFile.h" />
+    <ClInclude Include="showGraph.h" />
+    <ClInclude Include="targetFunction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -24,12 +24,24 @@
     <ClCompile Include="inputByHand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="showGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="targetFunction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="loadFromFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inputByHand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="showGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetFunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
