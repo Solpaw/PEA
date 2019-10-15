@@ -3,8 +3,8 @@
 #include <fstream>
 #include <string>
 #include <conio.h>
-#include "showGraph.h"
-#include "targetFunction.h"
+#include "graph.h"
+
 using namespace std;
 
 
@@ -24,20 +24,14 @@ void loadFromFileMenu() {
 	inFile >> name >> nrOfPoints;
 	cout << "Name: " << name << endl;
 
-	int** weightMatrix = new int *[nrOfPoints];
-	for (int i = 0; i < nrOfPoints; i++) {
-		weightMatrix[i] = new int[nrOfPoints];
-		for (int j = 0; j < nrOfPoints; j++) {
-			weightMatrix[i][j] = -1;
-		}
-	}
+	Graph* graf = new Graph(nrOfPoints, name);
 
 	int cur;
 	for (int i = 0; i < nrOfPoints; i++) {
 		for (int j = 0; j < nrOfPoints; j++) {
 			inFile >> cur;
 			if (cur != -1) {
-				weightMatrix[i][j] = cur;
+				graf->insertNumber(i,j,cur);
 			}
 		}
 	}
@@ -49,19 +43,19 @@ void loadFromFileMenu() {
 		int choice = _getch();
 		switch (choice) {
 		case '1':
-			showGraph(nrOfPoints, weightMatrix);
+			graf->showGraph();
+			cout << "Nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
 			break;
 		case '2':
-			calculateTarget(nrOfPoints, weightMatrix);
+			cout << endl << "Wartosc funkcji celu wynosi: " << graf->targetFunction();
+			cout << endl << "Nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
 			break;
 		case '3':
 			exit = true;
 			break;
 		}
 	}
-
-	for (int i = 0; i < nrOfPoints; i++) {
-		delete[] weightMatrix[i];
-	}
-	delete[]weightMatrix;
+	delete graf;
 }
