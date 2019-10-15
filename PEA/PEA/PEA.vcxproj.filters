@@ -24,13 +24,10 @@
     <ClCompile Include="inputByHand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="showGraph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="targetFunction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="randomValues.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,13 +38,10 @@
     <ClInclude Include="inputByHand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="showGraph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetFunction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="randomValues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

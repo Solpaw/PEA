@@ -151,19 +151,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="graph.cpp" />
     <ClCompile Include="inputByHand.cpp" />
     <ClCompile Include="loadFromFile.cpp" />
     <ClCompile Include="PEA.cpp" />
     <ClCompile Include="randomValues.cpp" />
-    <ClCompile Include="showGraph.cpp" />
-    <ClCompile Include="targetFunction.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="graph.h" />
     <ClInclude Include="inputByHand.h" />
     <ClInclude Include="loadFromFile.h" />
     <ClInclude Include="randomValues.h" />
-    <ClInclude Include="showGraph.h" />
-    <ClInclude Include="targetFunction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
