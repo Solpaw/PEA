@@ -6,7 +6,7 @@ class Graph
 	int** weightMatrix;
 	int nrOfPoints;
 	string name;
-	void bruteAlg(int x, int* path, int value, int *min);
+	void bruteAlg(int x, int* path, int value, int *min,int *minPath);
 public:
 	Graph(int nrOfPoints, string name);
 	~Graph();

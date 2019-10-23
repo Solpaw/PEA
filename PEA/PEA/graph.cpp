@@ -56,13 +56,18 @@ int Graph::targetFunction()
 int Graph::bruteForce()
 {
 	int* path = new int[nrOfPoints];
+	int* minPath = new int[nrOfPoints];
 	int min = -1;
-	bruteAlg(0, path, 0, &min);
+	bruteAlg(0, path, 0, &min,minPath);
+	cout << endl;
+	for (int i = 0; i < nrOfPoints; i++) {
+		cout << minPath[i] << " ";
+	}
 	delete[]path;
 	return min;
 }
 
-void Graph::bruteAlg(int x, int *path, int value, int *min)
+void Graph::bruteAlg(int x, int *path, int value, int *min,int *minPath)
 {
 	//czyszczenie poprzednich wynikow
 	for (int j = x; j < nrOfPoints; j++)
@@ -79,7 +84,12 @@ void Graph::bruteAlg(int x, int *path, int value, int *min)
 			len += this->weightMatrix[path[i]][path[i + 1]];
 		}
 		len += this->weightMatrix[path[nrOfPoints - 1]][0];
-		if (len < *min || *min==-1) *min = len;
+		if (len < *min || *min == -1) {
+			*min = len;
+			for (int i = 0; i < nrOfPoints; i++) {
+				minPath[i] = path[i];
+			}
+		}
 	}
 
 
@@ -90,7 +100,7 @@ void Graph::bruteAlg(int x, int *path, int value, int *min)
 			if (path[j] == i) in = true;
 		}
 		if (!in) {
-			bruteAlg(x + 1, path, i, min);
+			bruteAlg(x + 1, path, i, min,minPath);
 		}
 	}
 	return;
