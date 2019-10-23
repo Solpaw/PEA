@@ -63,6 +63,7 @@ int Graph::bruteForce()
 	for (int i = 0; i < nrOfPoints; i++) {
 		cout << minPath[i] << " ";
 	}
+	delete[]minPath;
 	delete[]path;
 	return min;
 }
@@ -76,7 +77,6 @@ void Graph::bruteAlg(int x, int *path, int value, int *min,int *minPath)
 	}
 	//przypisanie punktu do drogi
 	path[x] = value;
-
 	//sprawdzenie czy koniec drogi
 	if (x == nrOfPoints-1) {
 		int len = 0;
@@ -91,8 +91,6 @@ void Graph::bruteAlg(int x, int *path, int value, int *min,int *minPath)
 			}
 		}
 	}
-
-
 	//wyznaczanie drogi
 	for (int i = 0; i < nrOfPoints;i++) {
 		bool in = false;
