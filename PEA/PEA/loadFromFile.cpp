@@ -9,7 +9,7 @@ using namespace std;
 
 
 void loadFromFileMenu() {
-	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Zakoncz";
+	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Zakoncz";
 
 	ifstream inFile;
 	inFile.open("./dane/data10.txt");
@@ -53,6 +53,11 @@ void loadFromFileMenu() {
 			_getch();
 			break;
 		case '3':
+			cout << endl << "Wynik Brute Force: " << graf->bruteForce();
+			cout << endl << "Nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
+			break;
+		case '4':
 			exit = true;
 			break;
 		}
