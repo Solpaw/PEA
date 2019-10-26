@@ -17,6 +17,7 @@ public:
 	bool isVisited(int i);
 	void addVisit(int i);
 	void showMatrix();
+	void showPath();
 
 	friend bool operator<(BabNode a, BabNode b);
 };

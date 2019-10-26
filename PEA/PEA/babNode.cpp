@@ -32,6 +32,15 @@ void BabNode::showMatrix()
 	}
 }
 
+void BabNode::showPath()
+{
+	cout << endl;
+	for (int i : this->visited) {
+		cout << i+1 << " ";
+	}
+	cout << visited[0]+1;
+}
+
 bool operator<(BabNode a, BabNode b)
 {
 	return a.value>b.value;

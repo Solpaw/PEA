@@ -1,12 +1,11 @@
 #include <iostream>
 #include <conio.h>
 #include "graph.h"
+#include "menu.h"
 
 using namespace std;
 
 void inputByHand() {
-	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Zakoncz";
-
 	int nrOfPoints;
 	system("cls");
 	cout << "Wprowadz ilosc punktow: ";
@@ -36,27 +35,6 @@ void inputByHand() {
 			}
 		}
 	}
-
-	bool exit = false;
-	while (!exit) {
-		system("cls");
-		cout << menu;
-		int choice = _getch();
-		switch (choice) {
-		case '1':
-			graf->showGraph();
-			cout << "Nacisnij dowolny klawisz aby kontynuowac...";
-			_getch();
-			break;
-		case '2':
-			cout << endl << "Wartosc funkcji celu wynosi: " << graf->targetFunction();
-			cout << endl << "Nacisnij dowolny klawisz aby kontynuowac...";
-			_getch();
-			break;
-		case '3':
-			exit = true;
-			break;
-		}
-	}
+	menu(graf);
 	delete graf;
 }

@@ -16,10 +16,10 @@ void mainMenu() {
 		int userChoice = _getch();
 		switch (userChoice) {
 			case '1':
-				loadFromFileMenu();
+				loadFromFileMenu("data10");
 				break;
 			case '2':
-				randomValuesMenu();
+				randomValuesMenu(10);
 				break;
 			case '3':
 				inputByHand();

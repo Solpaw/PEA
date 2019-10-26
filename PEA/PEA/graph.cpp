@@ -7,26 +7,7 @@
 using namespace std;
 
 
-Graph::Graph(int nrOfPoints, string name)
-{
-	this->name = name;
-	this->nrOfPoints = nrOfPoints;
-	this->weightMatrix = new int* [nrOfPoints];
-	for (int i = 0; i < nrOfPoints; i++) {
-		weightMatrix[i] = new int[nrOfPoints];
-		for (int j = 0; j < nrOfPoints; j++) {
-			weightMatrix[i][j] = -1;
-		}
-	}
-}
-
-Graph::~Graph()
-{
-	for (int i = 0; i < nrOfPoints; i++) {
-		delete[] weightMatrix[i];
-	}
-	delete[]weightMatrix;
-}
+Graph::Graph(int nrOfPoints, string name) :weightMatrix(nrOfPoints, vector<int>(nrOfPoints, -1)), name(name), nrOfPoints(nrOfPoints) {};
 
 void Graph::showGraph()
 {
@@ -58,27 +39,21 @@ int Graph::targetFunction()
 
 int Graph::bruteForce()
 {
-	int* path = new int[nrOfPoints];
-	int* minPath = new int[nrOfPoints];
 	int min = -1;
+	vector<int> path(nrOfPoints);
+	vector<int> minPath(nrOfPoints);
 	bruteAlg(0, path, 0, &min,minPath);
 	cout << endl;
 	for (int i = 0; i < nrOfPoints; i++) {
 		cout << minPath[i]+1 << " ";
 	}
 	cout << minPath[0]+1;
-	delete[]minPath;
-	delete[]path;
 	return min;
 }
 
-void Graph::bruteAlg(int x, int *path, int value, int *min,int *minPath)
+void Graph::bruteAlg(int x, vector<int>& path, int value, int *min,vector<int>& minPath)
 {
-	//czyszczenie poprzednich wynikow
-	for (int j = x; j < nrOfPoints; j++)
-	{
-		path[j] = -1;
-	}
+	
 	//przypisanie punktu do drogi
 	path[x] = value;
 	//sprawdzenie czy koniec drogi
@@ -102,7 +77,7 @@ void Graph::bruteAlg(int x, int *path, int value, int *min,int *minPath)
 			if (path[j] == i) in = true;
 		}
 		if (!in) {
-			bruteAlg(x + 1, path, i, min,minPath);
+			bruteAlg(x + 1, path, i, min, minPath);
 		}
 	}
 	return;
@@ -121,6 +96,7 @@ vector<vector<int>> Graph::branchMinMat(vector<vector<int>> arr, int row, int co
 	return arr;
 }
 
+//obliczenie wartosci redukcji w rzedach i kolumnach
 int Graph::branchVal(vector<vector<int>> &arr)
 {
 	int sum = 0;
@@ -171,37 +147,29 @@ int Graph::branchVal(vector<vector<int>> &arr)
 			sum += min;
 		}
 	}
-
 	return sum;
 }
 
-int Graph::branchAlg(int **array,int startPoint, int endPoint)
+int Graph::branchAlg(vector<vector<int>> arr,int startPoint, int endPoint)
 {
-	vector<vector<int>> arr(nrOfPoints, vector<int>(nrOfPoints));
-	for (int i = 0; i < nrOfPoints; i++) {
-		for (int j = 0; j < nrOfPoints; j++) {
-			arr[i][j] = array[i][j];
-		}
-	}
-
-	int value = 0;
-	if (startPoint >= 0 && endPoint >= 0) value += array[startPoint][endPoint];
-	
+	//wyznaczenie wartosci dla roota
 	vector<int> vec;
 	vector<vector<int>> matrix = branchMinMat(arr, startPoint, endPoint);
-	value += branchVal(matrix);
+	int value = branchVal(matrix);
 
 	BabNode *node = new BabNode(matrix,nrOfPoints,startPoint,endPoint,value,0,vec);
 	priority_queue<BabNode> bq;
 	bq.push(*node);
 	delete node;
 
+	//przeszukiwanie drzewa
 	int result = 0;
 	while(true) {
 		BabNode curNode = bq.top();
 		bq.pop();
 		if (curNode.level == nrOfPoints - 1) {
 			result = curNode.value;
+			curNode.showPath();
 			break;
 		}
 

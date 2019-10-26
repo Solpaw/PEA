@@ -155,6 +155,7 @@
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="inputByHand.cpp" />
     <ClCompile Include="loadFromFile.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="PEA.cpp" />
     <ClCompile Include="randomValues.cpp" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="graph.h" />
     <ClInclude Include="inputByHand.h" />
     <ClInclude Include="loadFromFile.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="randomValues.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
