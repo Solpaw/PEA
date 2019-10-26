@@ -30,6 +30,9 @@
     <ClCompile Include="graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="babNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="loadFromFile.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="babNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

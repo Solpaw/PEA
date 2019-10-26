@@ -9,10 +9,10 @@ using namespace std;
 
 
 void loadFromFileMenu() {
-	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Zakoncz";
+	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Zakoncz";
 
 	ifstream inFile;
-	inFile.open("./dane/data10.txt");
+	inFile.open("./dane/data11.txt");
 	if (inFile.fail()) {
 		cerr << "Blad otwarcia pliku!";
 		return;
@@ -58,6 +58,10 @@ void loadFromFileMenu() {
 			_getch();
 			break;
 		case '4':
+			cout  << endl << "Wynik Branch and Bound: " << graf->branchAndBound();
+			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
+		case '5':
 			exit = true;
 			break;
 		}

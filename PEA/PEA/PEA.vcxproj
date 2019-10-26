@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="babNode.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="inputByHand.cpp" />
     <ClCompile Include="loadFromFile.cpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="randomValues.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="babNode.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="inputByHand.h" />
     <ClInclude Include="loadFromFile.h" />
