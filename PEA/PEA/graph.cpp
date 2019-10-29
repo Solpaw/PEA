@@ -193,32 +193,48 @@ int Graph::branchAndBound()
 	return result;
 }
 
-int Graph::dynamicAlg(int start, vector<int> rem)
+DpNode Graph::dynamicAlg(int start, vector<int> rem)
 {
-	priority_queue<int,vector<int>,greater<int>> pq;
+	//stworzenie kolejki priorytetowej
+	priority_queue<DpNode> pq;
+	//wywo³anie dla wszystkich punktow mozliwych do odwiedzenia
 	for (int i = 0; i < rem.size(); i++) {
+		//dodanie sciezki
 		int temp = weightMatrix[start][rem[i]];
-		int s = rem[i];
+		//usuniecie aktualnego punktu z listy mozliwych do odwiedzenia
 		vector<int> vec = rem;
-		vec.erase(vec.begin()+i);
+		vec.erase(vec.begin() + i);
+		//sprawdzenie czy koniec drogi
 		if (vec.empty()) {
-			temp += weightMatrix[s][0];
-			pq.push(temp);
+			temp += weightMatrix[rem[i]][0];
+			DpNode* node = new DpNode(temp, rem[i]);
+			pq.push(*node);
+			delete node;
 			continue;
 		}
-		temp += dynamicAlg(s, vec);
-		pq.push(temp);
+		DpNode t = dynamicAlg(rem[i], vec);
+		temp += t.value;
+		DpNode* node = new DpNode(temp, rem[i], t.visited);
+		pq.push(*node);
+		delete node;
 	}
-	if (!pq.empty()) return pq.top();
-	return 0;
+	return pq.top();
 }
 
 int Graph::dynamicProgramming()
 {
+	//wektor punktow do odwiedzenia
 	vector<int> vec;
 	for (int i = 1; i < nrOfPoints; i++) {
 		vec.push_back(i);
 	}
-	int result = dynamicAlg(0, vec);
-	return result;
+	//obliczenia
+	DpNode result = dynamicAlg(0, vec);
+	//wyswietlenie drogi
+	cout << endl << "1 ";
+	for (int i = result.visited.size()-1; i >= 0; i--) {
+		cout << result.visited[i]+1 << " ";
+	}
+	cout << "1";
+	return result.value;
 }

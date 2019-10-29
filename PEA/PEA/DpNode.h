@@ -6,7 +6,10 @@ class DpNode
 {
 public:
 	int value;
-	int visited;
+	vector<int> visited;
 	DpNode(int value, int visited);
+	DpNode(int value, int visited, vector<int> v);
+
+	friend bool operator<(DpNode a, DpNode b);
 };
 
