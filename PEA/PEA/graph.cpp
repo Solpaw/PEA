@@ -4,6 +4,7 @@
 #include <vector>
 #include "BabNode.h"
 #include <queue>
+#include "DpNode.h"
 using namespace std;
 
 
@@ -189,5 +190,35 @@ int Graph::branchAlg(vector<vector<int>> arr,int startPoint, int endPoint)
 int Graph::branchAndBound()
 {
 	int result = branchAlg(this->weightMatrix,-1,0);
+	return result;
+}
+
+int Graph::dynamicAlg(int start, vector<int> rem)
+{
+	priority_queue<int,vector<int>,greater<int>> pq;
+	for (int i = 0; i < rem.size(); i++) {
+		int temp = weightMatrix[start][rem[i]];
+		int s = rem[i];
+		vector<int> vec = rem;
+		vec.erase(vec.begin()+i);
+		if (vec.empty()) {
+			temp += weightMatrix[s][0];
+			pq.push(temp);
+			continue;
+		}
+		temp += dynamicAlg(s, vec);
+		pq.push(temp);
+	}
+	if (!pq.empty()) return pq.top();
+	return 0;
+}
+
+int Graph::dynamicProgramming()
+{
+	vector<int> vec;
+	for (int i = 1; i < nrOfPoints; i++) {
+		vec.push_back(i);
+	}
+	int result = dynamicAlg(0, vec);
 	return result;
 }

@@ -7,7 +7,7 @@ using namespace std;
 
 void menu(Graph *graf)
 {
-	string menu = "1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Zakoncz";
+	string menu = "0. Zakoncz\n1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Dynamic Programming";
 
 	bool exit = false;
 	while (!exit) {
@@ -36,6 +36,11 @@ void menu(Graph *graf)
 			_getch();
 			break;
 		case '5':
+			cout << endl << "Wynik Dynamic Programming: " << graf->dynamicProgramming();
+			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
+			break;
+		case '0':
 			exit = true;
 			break;
 		}

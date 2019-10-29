@@ -11,6 +11,7 @@ class Graph
 	vector<vector<int>> branchMinMat(vector<vector<int>> arr, int row, int column);
 	int branchVal(vector<vector<int>> &arr);
 	int branchAlg(vector<vector<int>> arr, int startPoint, int endPoint);
+	int dynamicAlg(int start, vector<int> remaining);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();
@@ -18,5 +19,6 @@ public:
 	int targetFunction();
 	int bruteForce();
 	int branchAndBound();
+	int dynamicProgramming();
 };
 
