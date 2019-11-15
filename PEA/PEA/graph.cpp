@@ -4,7 +4,6 @@
 #include <vector>
 #include "BabNode.h"
 #include <queue>
-#include "DpNode.h"
 using namespace std;
 
 
@@ -193,48 +192,55 @@ int Graph::branchAndBound()
 	return result;
 }
 
-DpNode Graph::dynamicAlg(int start, vector<int> rem)
+vector<int> Graph::dynamicProgramming(int start, vector<int> rem)
 {
-	//stworzenie kolejki priorytetowej
-	priority_queue<DpNode> pq;
-	//wywo³anie dla wszystkich punktow mozliwych do odwiedzenia
+	vector<int> minPath;
+
+	minPath.push_back(INT32_MAX);
+	string key = to_string(start);
 	for (int i = 0; i < rem.size(); i++) {
-		//dodanie sciezki
-		int temp = weightMatrix[start][rem[i]];
-		//usuniecie aktualnego punktu z listy mozliwych do odwiedzenia
-		vector<int> vec = rem;
-		vec.erase(vec.begin() + i);
-		//sprawdzenie czy koniec drogi
-		if (vec.empty()) {
-			temp += weightMatrix[rem[i]][0];
-			DpNode* node = new DpNode(temp, rem[i]);
-			pq.push(*node);
-			delete node;
-			continue;
-		}
-		DpNode t = dynamicAlg(rem[i], vec);
-		temp += t.value;
-		DpNode* node = new DpNode(temp, rem[i], t.visited);
-		pq.push(*node);
-		delete node;
+		key += to_string(rem[i]);
 	}
-	return pq.top();
+	if (!rem.empty()) {
+		vector<int> path;
+		int index;
+		auto search = nodes.find(key);
+		if (search!=nodes.end()) {
+			minPath.clear();
+			minPath = search->second;
+		}
+		else {
+			for (int i = 0; i < rem.size(); i++) {
+				vector<int> newRem = rem;
+				newRem.erase(newRem.begin() + i);
+				path = dynamicProgramming(rem[i], newRem);
+				path[0] += weightMatrix[start][rem[i]];
+				if (path[0] < minPath[0]) {
+					minPath = path;
+					index = i;
+				}
+			}
+			minPath.push_back(rem[index]);
+			nodes[key] = minPath;
+		}
+	}
+	else {
+		minPath[0] = weightMatrix[start][0];
+	}
+	return minPath;
 }
 
 int Graph::dynamicProgramming()
 {
-	//wektor punktow do odwiedzenia
 	vector<int> vec;
 	for (int i = 1; i < nrOfPoints; i++) {
 		vec.push_back(i);
 	}
-	//obliczenia
-	DpNode result = dynamicAlg(0, vec);
-	//wyswietlenie drogi
-	cout << endl << "1 ";
-	for (int i = result.visited.size()-1; i >= 0; i--) {
-		cout << result.visited[i]+1 << " ";
+	vector<int> result = dynamicProgramming(0, vec);
+	cout << endl << 1;
+	for (int i = result.size()-1; i > 0; i--) {
+		cout << " " << result[i] + 1;
 	}
-	cout << "1";
-	return result.value;
+	cout << " " << 1;
+	return result[0];
 }

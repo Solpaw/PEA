@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "DpNode.h"
+#include <unordered_map>
 using namespace std;
 class Graph
 {
+	unordered_map<string, vector<int>> nodes;
 	vector<vector<int>> weightMatrix;
 	int nrOfPoints;
 	string name;
@@ -12,7 +13,7 @@ class Graph
 	vector<vector<int>> branchMinMat(vector<vector<int>> arr, int row, int column);
 	int branchVal(vector<vector<int>> &arr);
 	int branchAlg(vector<vector<int>> arr, int startPoint, int endPoint);
-	DpNode dynamicAlg(int start, vector<int> remaining);
+	vector<int> dynamicProgramming(int start, vector<int> rem);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();
