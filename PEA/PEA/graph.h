@@ -13,7 +13,7 @@ class Graph
 	vector<vector<int>> branchMinMat(vector<vector<int>> arr, int row, int column);
 	int branchVal(vector<vector<int>> &arr);
 	int branchAlg(vector<vector<int>> arr, int startPoint, int endPoint);
-	vector<int> dynamicProgramming(int start, vector<int> rem);
+	vector<int> dynamicProgramming(int point, vector<int>& cities);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();

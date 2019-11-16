@@ -69,6 +69,7 @@ void Graph::bruteAlg(int x, vector<int>& path, int value, int *min,vector<int>& 
 				minPath[i] = path[i];
 			}
 		}
+		return;
 	}
 	//wyznaczanie drogi
 	for (int i = 0; i < nrOfPoints;i++) {
@@ -192,31 +193,53 @@ int Graph::branchAndBound()
 	return result;
 }
 
-vector<int> Graph::dynamicProgramming(int start, vector<int> rem)
+int Graph::dynamicProgramming()
+{
+	vector<int> vec;
+		for (int i = 1; i < nrOfPoints; i++) {
+			vec.push_back(i);
+		}
+	vector<int> result = dynamicProgramming(0, vec);
+	cout << endl << 1 << " ";
+	for (int i = result.size() - 1; i > 0; i--)
+	{
+		cout << result[i]+1 << " ";
+	}
+	cout << 1;
+	return result[0];
+}
+
+
+vector<int> Graph::dynamicProgramming(int start, vector<int>& rem)
 {
 	vector<int> minPath;
-
+	
 	minPath.push_back(INT32_MAX);
 	string key = to_string(start);
-	for (int i = 0; i < rem.size(); i++) {
-		key += to_string(rem[i]);
+	for (int i = 0; i < rem.size(); i++)
+	{
+		key += ";" + to_string(rem[i]);
 	}
-	if (!rem.empty()) {
-		vector<int> path;
-		int index;
+	if (!rem.empty())
+	{
 		auto search = nodes.find(key);
-		if (search!=nodes.end()) {
-			minPath.clear();
+		if (search != nodes.end())
+		{
 			minPath = search->second;
 		}
-		else {
-			for (int i = 0; i < rem.size(); i++) {
-				vector<int> newRem = rem;
-				newRem.erase(newRem.begin() + i);
-				path = dynamicProgramming(rem[i], newRem);
-				path[0] += weightMatrix[start][rem[i]];
-				if (path[0] < minPath[0]) {
-					minPath = path;
+		else
+		{
+			vector<int> curPath;
+			int index = 0;
+			for (int i = 0; i < rem.size(); i++)
+			{
+				vector<int> newCities = rem;
+				newCities.erase(newCities.begin() + i);
+				curPath = dynamicProgramming(rem[i], newCities);
+				curPath[0] += weightMatrix[start][rem[i]];
+				if (curPath[0] < minPath[0])
+				{
+					minPath = curPath;
 					index = i;
 				}
 			}
@@ -224,23 +247,9 @@ vector<int> Graph::dynamicProgramming(int start, vector<int> rem)
 			nodes[key] = minPath;
 		}
 	}
-	else {
+	else
+	{
 		minPath[0] = weightMatrix[start][0];
 	}
 	return minPath;
-}
-
-int Graph::dynamicProgramming()
-{
-	vector<int> vec;
-	for (int i = 1; i < nrOfPoints; i++) {
-		vec.push_back(i);
-	}
-	vector<int> result = dynamicProgramming(0, vec);
-	cout << endl << 1;
-	for (int i = result.size()-1; i > 0; i--) {
-		cout << " " << result[i] + 1;
-	}
-	cout << " " << 1;
-	return result[0];
 }
