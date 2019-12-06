@@ -209,7 +209,6 @@ int Graph::dynamicProgramming()
 	return result[0];
 }
 
-
 vector<int> Graph::dynamicProgramming(int start, vector<int>& rem)
 {
 	vector<int> minPath;
@@ -252,4 +251,112 @@ vector<int> Graph::dynamicProgramming(int start, vector<int>& rem)
 		minPath[0] = weightMatrix[start][0];
 	}
 	return minPath;
+}
+
+int Graph::tabuEvaluate(vector<int> vec)
+{
+	int res = 0;
+	for (int i = 0; i < vec.size() - 1; i++) {
+		res += weightMatrix[vec[i]][vec[i + 1]];
+	}
+	return res;
+}
+
+vector<int> Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList,vector<int>&bestFoundPath,int&bestFoundSolution, int maxCounter, int tabuCooldown)
+{
+	if (bestFoundSolution > currentSolution) {
+		bestFoundPath = currentPath;
+		bestFoundSolution = currentSolution;
+	}
+	updateTabuList(tabuList);
+	if (counter == maxCounter) return currentPath;
+	vector <int> tempPath = currentPath;
+	vector <int> nPath = currentPath;
+	int res = currentSolution;
+	int tabuX = -1, tabuY = -1;
+	int min = INT32_MAX;
+	for (int i = 1; i < currentPath.size() - 2; i++) {
+		int t = tempPath[i];
+		for (int j = i + 1; j < currentPath.size() - 1; j++) {
+			//cout << i << "-" << j;
+			tempPath = currentPath;
+			tempPath[i] = tempPath[j];
+			tempPath[j] = t;
+			res = tabuEvaluate(tempPath);
+			//cout << "=" << res - currentSolution << endl;
+			if (checkTabuList(tabuList, i, j) && res - currentSolution > 0) continue;
+			if (res < min) {
+				//cout << res - currentSolution << endl;
+				min = res;
+				tabuX = i;
+				tabuY = j;
+			}
+		}
+	}
+	int t = nPath[tabuX];
+	nPath[tabuX] = nPath[tabuY];
+	nPath[tabuY] = t;
+	TabuList add;
+	add.cooldown = tabuCooldown;
+	add.x = tabuX;
+	add.y = tabuY;
+	tabuList.push_back(add);
+	nPath = tabuAlg(nPath, tabuEvaluate(nPath), counter + 1,tabuList,bestFoundPath,bestFoundSolution, maxCounter, tabuCooldown);
+	return nPath;
+}
+
+bool Graph::checkTabuList(vector<TabuList>& tabuList,int x, int y)
+{
+
+	for (int i = 0; i < tabuList.size(); i++) {
+		if (tabuList[i].x == x && tabuList[i].y == y) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Graph::updateTabuList(vector<TabuList>& tabuList)
+{
+	for (int i = 0; i < tabuList.size(); i++) {
+		if (--tabuList[i].cooldown == 0) {
+			tabuList.erase(tabuList.begin() + i);
+			i--;
+		}
+	}
+}
+
+int Graph::tabuSearch(int maxCounter, int tabuCooldown)
+{
+	
+	vector<TabuList> tabuList;
+	vector<int> currentPath;
+	bool* tab = new bool[nrOfPoints];
+	for (int i = 0; i < nrOfPoints; i++) {
+		tab[i] = false;
+	}
+	currentPath.push_back(0);
+	int index = 0;
+	for (int i = 0; i < nrOfPoints-1; i++) {
+		int min = INT32_MAX;
+		for (int j = 1; j < nrOfPoints; j++) {
+			if (weightMatrix[currentPath[i]][j] < min && j != currentPath[i]&&!tab[j]) {
+				min = weightMatrix[currentPath[i]][j];
+				index = j;
+			}
+		}
+		currentPath.push_back(index);
+		tab[index] = true;
+	}
+	delete[]tab;
+	currentPath.push_back(0);
+	int currentSolution = tabuEvaluate(currentPath);
+	vector<int> bestFoundPath = currentPath;
+	int bestFoundSolution = currentSolution;
+	tabuAlg(currentPath, currentSolution,0,tabuList,bestFoundPath,bestFoundSolution,maxCounter,tabuCooldown);
+	cout << endl;
+	for (int i = 0; i < currentPath.size(); i++) {
+		cout << bestFoundPath[i] +1 << " ";
+	}
+	return bestFoundSolution;
 }
