@@ -41,7 +41,7 @@ void menu(Graph *graf)
 			_getch();
 			break;
 		case '6':
-			cout << endl << "Wynik Tabu Search: " << graf->tabuSearch(500,5);
+			cout << endl << "Wynik Tabu Search: " << graf->tabuSearch(graf->getNrOfPoints()*2,3);
 			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
 			_getch();
 			break;

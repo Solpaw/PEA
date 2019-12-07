@@ -25,6 +25,11 @@ void Graph::insertNumber(int i, int j, int value)
 	this->weightMatrix[i][j] = value;
 }
 
+int Graph::getNrOfPoints()
+{
+	return this->nrOfPoints;
+}
+
 int Graph::targetFunction()
 {
 	int result = 0;
@@ -262,47 +267,38 @@ int Graph::tabuEvaluate(vector<int> vec)
 	return res;
 }
 
-vector<int> Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList,vector<int>&bestFoundPath,int&bestFoundSolution, int maxCounter, int tabuCooldown)
+void Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList,vector<int>&bestFoundPath,int&bestFoundSolution, int maxCounter, int tabuCooldown, int sinceLastImprovement)
 {
 	if (bestFoundSolution > currentSolution) {
+		sinceLastImprovement = 0;
 		bestFoundPath = currentPath;
 		bestFoundSolution = currentSolution;
 	}
 	updateTabuList(tabuList);
-	if (counter == maxCounter) return currentPath;
-	vector <int> tempPath = currentPath;
+	if (counter == maxCounter || sinceLastImprovement == 100) return;
 	vector <int> nPath = currentPath;
-	int res = currentSolution;
-	int tabuX = -1, tabuY = -1;
-	int min = INT32_MAX;
+	int res, tabuX, tabuY, min = INT32_MAX, t;
 	for (int i = 1; i < currentPath.size() - 2; i++) {
-		int t = tempPath[i];
 		for (int j = i + 1; j < currentPath.size() - 1; j++) {
-			//cout << i << "-" << j;
-			tempPath = currentPath;
-			tempPath[i] = tempPath[j];
-			tempPath[j] = t;
-			res = tabuEvaluate(tempPath);
-			//cout << "=" << res - currentSolution << endl;
-			if (checkTabuList(tabuList, i, j) && res - currentSolution > 0) continue;
+			nPath = currentPath;
+			t = nPath[i];
+			nPath[i] = nPath[j];
+			nPath[j] = t;
+			res = tabuEvaluate(nPath);
+			if (checkTabuList(tabuList, i, j)) continue;
 			if (res < min) {
-				//cout << res - currentSolution << endl;
 				min = res;
 				tabuX = i;
 				tabuY = j;
 			}
 		}
 	}
-	int t = nPath[tabuX];
+	nPath = currentPath;
+	t = nPath[tabuX];
 	nPath[tabuX] = nPath[tabuY];
 	nPath[tabuY] = t;
-	TabuList add;
-	add.cooldown = tabuCooldown;
-	add.x = tabuX;
-	add.y = tabuY;
-	tabuList.push_back(add);
-	nPath = tabuAlg(nPath, tabuEvaluate(nPath), counter + 1,tabuList,bestFoundPath,bestFoundSolution, maxCounter, tabuCooldown);
-	return nPath;
+	tabuList.push_back({ tabuX,tabuY,tabuCooldown });
+	tabuAlg(nPath, min, counter + 1,tabuList,bestFoundPath,bestFoundSolution, maxCounter, tabuCooldown, sinceLastImprovement + 1);
 }
 
 bool Graph::checkTabuList(vector<TabuList>& tabuList,int x, int y)
@@ -328,7 +324,6 @@ void Graph::updateTabuList(vector<TabuList>& tabuList)
 
 int Graph::tabuSearch(int maxCounter, int tabuCooldown)
 {
-	
 	vector<TabuList> tabuList;
 	vector<int> currentPath;
 	bool* tab = new bool[nrOfPoints];
@@ -353,7 +348,7 @@ int Graph::tabuSearch(int maxCounter, int tabuCooldown)
 	int currentSolution = tabuEvaluate(currentPath);
 	vector<int> bestFoundPath = currentPath;
 	int bestFoundSolution = currentSolution;
-	tabuAlg(currentPath, currentSolution,0,tabuList,bestFoundPath,bestFoundSolution,maxCounter,tabuCooldown);
+	tabuAlg(currentPath, currentSolution,0,tabuList,bestFoundPath,bestFoundSolution,maxCounter,tabuCooldown,0);
 	cout << endl;
 	for (int i = 0; i < currentPath.size(); i++) {
 		cout << bestFoundPath[i] +1 << " ";

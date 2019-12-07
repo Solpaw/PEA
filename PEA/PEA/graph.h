@@ -18,13 +18,14 @@ class Graph
 	int branchAlg(vector<vector<int>> arr, int startPoint, int endPoint);
 	vector<int> dynamicProgramming(int point, vector<int>& cities);
 	int tabuEvaluate(vector<int> vec);
-	vector<int> tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList, vector<int>& bestFoundPath, int& bestFoundSolution, int maxCounter, int tabuCooldown);
+	void tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList, vector<int>& bestFoundPath, int& bestFoundSolution, int maxCounter, int tabuCooldown, int sinceLastImprovement);
 	bool checkTabuList(vector < TabuList> & tabuList,int x,int y);
 	void updateTabuList(vector < TabuList> & tabuList);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();
 	void insertNumber(int i,int j,int value);
+	int getNrOfPoints();
 	int targetFunction();
 	int bruteForce();
 	int branchAndBound();
