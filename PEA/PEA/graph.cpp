@@ -4,6 +4,8 @@
 #include <vector>
 #include "BabNode.h"
 #include <queue>
+#include <chrono>
+#include <random>
 using namespace std;
 
 
@@ -322,9 +324,8 @@ void Graph::updateTabuList(vector<TabuList>& tabuList)
 	}
 }
 
-int Graph::tabuSearch(int maxCounter, int tabuCooldown)
+vector<int> Graph::generateInitialPath()
 {
-	vector<TabuList> tabuList;
 	vector<int> currentPath;
 	bool* tab = new bool[nrOfPoints];
 	for (int i = 0; i < nrOfPoints; i++) {
@@ -332,10 +333,10 @@ int Graph::tabuSearch(int maxCounter, int tabuCooldown)
 	}
 	currentPath.push_back(0);
 	int index = 0;
-	for (int i = 0; i < nrOfPoints-1; i++) {
+	for (int i = 0; i < nrOfPoints - 1; i++) {
 		int min = INT32_MAX;
 		for (int j = 1; j < nrOfPoints; j++) {
-			if (weightMatrix[currentPath[i]][j] < min && j != currentPath[i]&&!tab[j]) {
+			if (weightMatrix[currentPath[i]][j] < min && j != currentPath[i] && !tab[j]) {
 				min = weightMatrix[currentPath[i]][j];
 				index = j;
 			}
@@ -345,6 +346,13 @@ int Graph::tabuSearch(int maxCounter, int tabuCooldown)
 	}
 	delete[]tab;
 	currentPath.push_back(0);
+	return currentPath;
+}
+
+int Graph::tabuSearch(int maxCounter, int tabuCooldown)
+{
+	vector<TabuList> tabuList;
+	vector<int> currentPath = generateInitialPath();
 	int currentSolution = tabuEvaluate(currentPath);
 	vector<int> bestFoundPath = currentPath;
 	int bestFoundSolution = currentSolution;
@@ -355,3 +363,60 @@ int Graph::tabuSearch(int maxCounter, int tabuCooldown)
 	}
 	return bestFoundSolution;
 }
+
+void Graph::saAlg(vector<int> currentPath, int currentSolution, int counter, int maxCounter,vector<int>& bestFoundPath, int& bestFoundSolution)
+{
+	if (bestFoundSolution > currentSolution) {
+		bestFoundPath = currentPath;
+		bestFoundSolution = currentSolution;
+	}
+	if (counter == maxCounter) return;
+	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+	mt19937 gen(seed);
+	uniform_int_distribution<mt19937::result_type> dist;
+	double tempreture = 100000000;
+	double coolingRate = 0.99;
+	int ix = 0;
+	while (tempreture>1) {
+		vector<int> nPath = currentPath;
+		int first = dist(gen) % (nrOfPoints - 1) + 1;
+		int second = dist(gen) % (nrOfPoints - 1) + 1;
+		while (first == second) {
+			second = dist(gen) % (nrOfPoints - 1) + 1;
+		}
+		int t = nPath[first];
+		nPath[first] = nPath[second];
+		nPath[second] = t;
+		int res = tabuEvaluate(nPath);
+		//double i = dist(gen) % 100 / (double)100;
+		if (res < currentSolution || (res - currentSolution) / tempreture < 0.10) {
+			currentPath = nPath;
+			currentSolution = res;
+		}
+		if (currentSolution < bestFoundSolution) {
+			bestFoundPath = currentPath;
+			bestFoundSolution = currentSolution;
+		}
+		tempreture *= coolingRate;
+	}
+}
+
+int Graph::simulatedAnnealing(int maxCounter)
+{
+	vector<int> currentPath = generateInitialPath();
+	int currentSolution = tabuEvaluate(currentPath);
+	vector<int> bestFoundPath = currentPath;
+	int bestFoundSolution = currentSolution;
+	saAlg(currentPath, currentSolution, 0, maxCounter, bestFoundPath, bestFoundSolution);
+	cout << endl;
+	for (int i = 0; i < currentPath.size(); i++) {
+		cout << bestFoundPath[i] + 1 << " ";
+	}
+	return bestFoundSolution;
+}
+
+//cout << endl;
+//for (int i = 0; i < currentPath.size(); i++) {
+//	cout << currentPath[i] << " ";
+//}
+//cout << endl;

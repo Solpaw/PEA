@@ -7,7 +7,7 @@ using namespace std;
 
 void menu(Graph *graf)
 {
-	string menu = "0. Zakoncz\n1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Dynamic Programming\n6. Tabu Search";
+	string menu = "0. Zakoncz\n1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Dynamic Programming\n6. Tabu Search\n7. Symulowane Wyzarzanie";
 
 	bool exit = false;
 	while (!exit) {
@@ -42,6 +42,11 @@ void menu(Graph *graf)
 			break;
 		case '6':
 			cout << endl << "Wynik Tabu Search: " << graf->tabuSearch(graf->getNrOfPoints()*2,3);
+			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
+			break;
+		case '7':
+			cout << endl << "Wynik Symulowanego Wyzarzania: " << graf->simulatedAnnealing(10);
 			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
 			_getch();
 			break;
