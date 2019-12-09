@@ -22,7 +22,7 @@ class Graph
 	bool checkTabuList(vector < TabuList> & tabuList,int x,int y);
 	void updateTabuList(vector < TabuList> & tabuList);
 	vector<int> generateInitialPath();
-	void saAlg(vector<int> currentPath, int currentSolution, int counter, int maxCounter, vector<int>& bestFoundPath, int& bestFoundSolution);
+	void saAlg(vector<int> currentPath, int currentSolution, double temperature, double coolingRate, double limit, vector<int>& bestFoundPath, int& bestFoundSolution);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();
@@ -33,6 +33,6 @@ public:
 	int branchAndBound();
 	int dynamicProgramming();
 	int tabuSearch(int maxCounter, int tabuCooldown);
-	int simulatedAnnealing(int maxCounter);
+	int simulatedAnnealing(double temperature, double coolingRate, double limit);
 };
 

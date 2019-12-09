@@ -19,7 +19,7 @@ void mainMenu() {
 		int userChoice = _getch();
 		switch (userChoice) {
 			case '1':
-				loadFromFileMenu("data18");
+				loadFromFileMenu("data10");
 				break;
 			case '2':
 				randomValuesMenu(10);

@@ -271,13 +271,16 @@ int Graph::tabuEvaluate(vector<int> vec)
 
 void Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList,vector<int>&bestFoundPath,int&bestFoundSolution, int maxCounter, int tabuCooldown, int sinceLastImprovement)
 {
+	//sprawdzenie wyniku
 	if (bestFoundSolution > currentSolution) {
 		sinceLastImprovement = 0;
 		bestFoundPath = currentPath;
 		bestFoundSolution = currentSolution;
 	}
 	updateTabuList(tabuList);
-	if (counter == maxCounter || sinceLastImprovement == 100) return;
+	//warunek konca
+	if (counter == maxCounter || sinceLastImprovement == maxCounter/3) return;
+	//wyznaczenie najlepszej zamiany
 	vector <int> nPath = currentPath;
 	int res, tabuX, tabuY, min = INT32_MAX, t;
 	for (int i = 1; i < currentPath.size() - 2; i++) {
@@ -287,6 +290,7 @@ void Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, v
 			nPath[i] = nPath[j];
 			nPath[j] = t;
 			res = tabuEvaluate(nPath);
+			//jesli zamiana zakazana pomin
 			if (checkTabuList(tabuList, i, j)) continue;
 			if (res < min) {
 				min = res;
@@ -295,11 +299,14 @@ void Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, v
 			}
 		}
 	}
+	//wykonanie najlepszej zamiany
 	nPath = currentPath;
 	t = nPath[tabuX];
 	nPath[tabuX] = nPath[tabuY];
 	nPath[tabuY] = t;
+	//wpisanie zamiany do listy tabu
 	tabuList.push_back({ tabuX,tabuY,tabuCooldown });
+	//kontynuacja algorytmu z nowymi danymi
 	tabuAlg(nPath, min, counter + 1,tabuList,bestFoundPath,bestFoundSolution, maxCounter, tabuCooldown, sinceLastImprovement + 1);
 }
 
@@ -327,24 +334,19 @@ void Graph::updateTabuList(vector<TabuList>& tabuList)
 vector<int> Graph::generateInitialPath()
 {
 	vector<int> currentPath;
-	bool* tab = new bool[nrOfPoints];
-	for (int i = 0; i < nrOfPoints; i++) {
-		tab[i] = false;
-	}
+	vector<bool> tab(nrOfPoints,false);
 	currentPath.push_back(0);
-	int index = 0;
-	for (int i = 0; i < nrOfPoints - 1; i++) {
+	for (pair<int,int> i(0,0); i.first < nrOfPoints - 1; i.first++) {
 		int min = INT32_MAX;
 		for (int j = 1; j < nrOfPoints; j++) {
-			if (weightMatrix[currentPath[i]][j] < min && j != currentPath[i] && !tab[j]) {
-				min = weightMatrix[currentPath[i]][j];
-				index = j;
+			if (weightMatrix[currentPath[i.first]][j] < min && j != currentPath[i.first] && !tab[j]) {
+				min = weightMatrix[currentPath[i.first]][j];
+				i.second = j;
 			}
 		}
-		currentPath.push_back(index);
-		tab[index] = true;
+		currentPath.push_back(i.second);
+		tab[i.second] = true;
 	}
-	delete[]tab;
 	currentPath.push_back(0);
 	return currentPath;
 }
@@ -352,71 +354,63 @@ vector<int> Graph::generateInitialPath()
 int Graph::tabuSearch(int maxCounter, int tabuCooldown)
 {
 	vector<TabuList> tabuList;
-	vector<int> currentPath = generateInitialPath();
-	int currentSolution = tabuEvaluate(currentPath);
-	vector<int> bestFoundPath = currentPath;
-	int bestFoundSolution = currentSolution;
-	tabuAlg(currentPath, currentSolution,0,tabuList,bestFoundPath,bestFoundSolution,maxCounter,tabuCooldown,0);
+	vector<int> bestFoundPath = generateInitialPath();
+	int bestFoundSolution = tabuEvaluate(bestFoundPath);
+	tabuAlg(bestFoundPath, bestFoundSolution,0,tabuList,bestFoundPath,bestFoundSolution,maxCounter,tabuCooldown,0);
 	cout << endl;
-	for (int i = 0; i < currentPath.size(); i++) {
+	for (int i = 0; i < bestFoundPath.size(); i++) {
 		cout << bestFoundPath[i] +1 << " ";
 	}
 	return bestFoundSolution;
 }
 
-void Graph::saAlg(vector<int> currentPath, int currentSolution, int counter, int maxCounter,vector<int>& bestFoundPath, int& bestFoundSolution)
+void Graph::saAlg(vector<int> currentPath, int currentSolution, double temperature, double coolingRate, double limit,vector<int>& bestFoundPath, int& bestFoundSolution)
 {
+	//sprawdzenie wyniku
 	if (bestFoundSolution > currentSolution) {
 		bestFoundPath = currentPath;
 		bestFoundSolution = currentSolution;
 	}
-	if (counter == maxCounter) return;
+	//przygotowanie funkcji losujacej
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
 	mt19937 gen(seed);
 	uniform_int_distribution<mt19937::result_type> dist;
-	double tempreture = 100000000;
-	double coolingRate = 0.99;
-	int ix = 0;
-	while (tempreture>1) {
+
+	while (temperature > 1) {
 		vector<int> nPath = currentPath;
+		//losowanie zamiany
 		int first = dist(gen) % (nrOfPoints - 1) + 1;
 		int second = dist(gen) % (nrOfPoints - 1) + 1;
 		while (first == second) {
 			second = dist(gen) % (nrOfPoints - 1) + 1;
 		}
+		//wykonanie zamiany
 		int t = nPath[first];
 		nPath[first] = nPath[second];
 		nPath[second] = t;
-		int res = tabuEvaluate(nPath);
-		//double i = dist(gen) % 100 / (double)100;
-		if (res < currentSolution || (res - currentSolution) / tempreture < 0.10) {
+		//sprawdzenie wyniku
+		t = tabuEvaluate(nPath);
+		if (t < currentSolution || (t - currentSolution) / temperature < limit) {
 			currentPath = nPath;
-			currentSolution = res;
+			currentSolution = t;
 		}
 		if (currentSolution < bestFoundSolution) {
 			bestFoundPath = currentPath;
 			bestFoundSolution = currentSolution;
 		}
-		tempreture *= coolingRate;
+		//zmniejszenie temperatury
+		temperature *= coolingRate;
 	}
 }
 
-int Graph::simulatedAnnealing(int maxCounter)
+int Graph::simulatedAnnealing(double temperature, double coolingRate, double limit)
 {
-	vector<int> currentPath = generateInitialPath();
-	int currentSolution = tabuEvaluate(currentPath);
-	vector<int> bestFoundPath = currentPath;
-	int bestFoundSolution = currentSolution;
-	saAlg(currentPath, currentSolution, 0, maxCounter, bestFoundPath, bestFoundSolution);
+	vector<int> bestFoundPath = generateInitialPath();
+	int bestFoundSolution = tabuEvaluate(bestFoundPath);
+	saAlg(bestFoundPath, bestFoundSolution, temperature, coolingRate, limit, bestFoundPath, bestFoundSolution);
 	cout << endl;
-	for (int i = 0; i < currentPath.size(); i++) {
+	for (int i = 0; i < bestFoundPath.size(); i++) {
 		cout << bestFoundPath[i] + 1 << " ";
 	}
 	return bestFoundSolution;
 }
-
-//cout << endl;
-//for (int i = 0; i < currentPath.size(); i++) {
-//	cout << currentPath[i] << " ";
-//}
-//cout << endl;

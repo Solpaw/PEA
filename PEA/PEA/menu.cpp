@@ -46,7 +46,7 @@ void menu(Graph *graf)
 			_getch();
 			break;
 		case '7':
-			cout << endl << "Wynik Symulowanego Wyzarzania: " << graf->simulatedAnnealing(10);
+			cout << endl << "Wynik Symulowanego Wyzarzania: " << graf->simulatedAnnealing(graf->getNrOfPoints()*100,0.9999,0.10);
 			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
 			_getch();
 			break;
