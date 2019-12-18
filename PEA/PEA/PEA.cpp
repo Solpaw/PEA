@@ -31,45 +31,36 @@ void mainMenu() {
 				exit = true;
 				break;
 			case '5':
-				const int maxNrOfPoints = 10;
-				const int reps = 10;
+
+				vector<string> names = { "data10","data11","data12","data13","data14","data15","data16","data18","data21","data24","data26","data34","data39","data43","data48","data56","data58","data65","data70","data100","data120","data171","data323","data358"};
 
 				ofstream file;
 				file.open("test.csv");
-				file << "Nr of Points;Dynamic Programming results\n";
+				file << "Tabu Search\n";
+				file << "Name;Time[us];Result\n";
 
-				for (int i = 3; i <= maxNrOfPoints; i++) {
-					file << i << ";";
-					for (int j = 0; j < reps; j++) {
-						Graph graf = graphTest(i);
-						auto t1 = chrono::high_resolution_clock::now();
-						graf.dynamicProgramming();
-						auto t2 = chrono::high_resolution_clock::now();
-						auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
-						file << duration << ";";
-					}
-					file << "\n";
+				for (int i = 0; i < names.size(); i++) {
+					Graph graf = loadFromFile(names[i]);
+					auto t1 = chrono::high_resolution_clock::now();
+					int res = graf.tabuSearch(graf.getNrOfPoints()*2, 3);
+					auto t2 = chrono::high_resolution_clock::now();
+					auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
+					file << graf.getName() << ";" << duration << ";" << res <<  "\n";
 				}
 
+				file << "Simulated Annealing\n";
+				file << "Name;Time[us];Result\n";
 
-				file << "\n\n\nNr of Points;Branch and Bound results\n";
-
-				for (int i = 3; i <= maxNrOfPoints; i++) {
-					file << i << ";";
-					for (int j = 0; j < reps; j++) {
-						Graph graf = graphTest(i);
-						auto t1 = chrono::high_resolution_clock::now();
-						graf.branchAndBound();
-						auto t2 = chrono::high_resolution_clock::now();
-						auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
-						file << duration << ";";
-					}
-					file << "\n";
+				for (int i = 0; i < names.size(); i++) {
+					Graph graf = loadFromFile(names[i]);
+					auto t1 = chrono::high_resolution_clock::now();
+					int res = graf.simulatedAnnealing(graf.getNrOfPoints() * 100, 0.9999, 0.10);
+					auto t2 = chrono::high_resolution_clock::now();
+					auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
+					file << graf.getName() << ";" << duration << ";" << res << "\n";
 				}
 
-				file << "\n\n\nNr of Points;Brute Force results\n";
-
-				for (int i = 3; i <= maxNrOfPoints; i++) {
+				/*for (int i = 3; i <= maxNrOfPoints; i++) {
 					file << i << ";";
 					for (int j = 0; j < reps; j++) {
 						Graph graf = graphTest(i);
@@ -79,8 +70,8 @@ void mainMenu() {
 						auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
 						file << duration << ";";
 					}
-					file << "\n";
-				}
+					file << "\n";*/
+				//}
 				
 				cout << endl << "Koniec...";
 				file.close();

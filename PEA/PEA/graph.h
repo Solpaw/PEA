@@ -28,6 +28,7 @@ public:
 	void showGraph();
 	void insertNumber(int i,int j,int value);
 	int getNrOfPoints();
+	string getName();
 	int targetFunction();
 	int bruteForce();
 	int branchAndBound();

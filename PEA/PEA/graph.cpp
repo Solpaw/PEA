@@ -32,6 +32,11 @@ int Graph::getNrOfPoints()
 	return this->nrOfPoints;
 }
 
+string Graph::getName()
+{
+	return this->name;
+}
+
 int Graph::targetFunction()
 {
 	int result = 0;
@@ -291,7 +296,7 @@ void Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, v
 			nPath[j] = t;
 			res = tabuEvaluate(nPath);
 			//jesli zamiana zakazana pomin
-			if (checkTabuList(tabuList, i, j)) continue;
+			if (checkTabuList(tabuList, i, j) && res >= bestFoundSolution) continue;
 			if (res < min) {
 				min = res;
 				tabuX = i;
