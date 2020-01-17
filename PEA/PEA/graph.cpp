@@ -96,6 +96,22 @@ void Graph::bruteAlg(int x, vector<int>& path, int value, int *min,vector<int>& 
 	return;
 }
 
+void Graph::showPath(vector<int> bestFoundPath)
+{
+	cout << endl;
+	for (int i = 0; i < bestFoundPath.size(); i++) {
+		cout << bestFoundPath[i] + 1 << " ";
+	}
+}
+
+bool Graph::checkPathForRepeats(vector<int> vec,int num)
+{
+	for (int i = 0; i < vec.size(); i++) {
+		if (vec[i] == num) return true;
+	}
+	return false;
+}
+
 //wykluczenie rzedu i kolumny
 vector<vector<int>> Graph::branchMinMat(vector<vector<int>> arr, int row, int column)
 {
@@ -373,8 +389,8 @@ void Graph::saAlg(vector<int> currentPath, int currentSolution, double temperatu
 {
 	//sprawdzenie wyniku
 	if (bestFoundSolution > currentSolution) {
-		bestFoundPath = currentPath;
-		bestFoundSolution = currentSolution;
+bestFoundPath = currentPath;
+bestFoundSolution = currentSolution;
 	}
 	//przygotowanie funkcji losujacej
 	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
@@ -408,6 +424,80 @@ void Graph::saAlg(vector<int> currentPath, int currentSolution, double temperatu
 	}
 }
 
+vector<vector<int>> Graph::gaInitialPopulation(int popSize)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> range(1, nrOfPoints - 1);
+	vector<vector<int>> pop;
+	for (int i = 0; i < popSize; i++) {
+		vector<int> nPath;
+		nPath.push_back(0);
+		for (int i = 0; i < nrOfPoints - 1; i++) {
+			int point;
+			while (true) {
+				point = range(rng);
+				if (!checkPathForRepeats(nPath, point)) break;
+			}
+			nPath.push_back(point);
+		}
+		nPath.push_back(0);
+		pop.push_back(nPath);
+	}
+	return pop;
+}
+
+vector<int> Graph::gaMutate(vector<int> a,int mutationRate)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> mutation(0, 100);
+	if (mutation(rng) > mutationRate) return a;
+	uniform_int_distribution<mt19937::result_type> mutationRange(1, nrOfPoints - 1);
+	int start = mutationRange(rng);
+	int end = mutationRange(rng);
+	int temp = a[start];
+	a[start] = a[end];
+	a[end] = temp;
+	return a;
+}
+
+vector<int> Graph::gaCrossover(vector<int> a, vector<int> b, int crossoverRate)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> crossover(0, 100);
+	if (crossover(rng) > crossoverRate) return a;
+	uniform_int_distribution<mt19937::result_type> crossoverRange(1, nrOfPoints-1);
+	vector<int> res;
+	for (int i = 0; i < nrOfPoints + 1; i++) {
+		res.push_back(-1);
+	}
+	int start = crossoverRange(rng);
+	int end = crossoverRange(rng);
+	if (end < start) {
+		int temp = start;
+		start = end;
+		end = temp;
+	}
+	for (int i = start; i <= end; i++) {
+		res[i] = a[i];
+	}
+	res[0] = 0;
+	int j = 1;
+	for (int i = 1; i < nrOfPoints;i++) {
+		if (res[i] != -1) continue;
+		for (int j = 1; j < nrOfPoints; j++) {
+			if (!checkPathForRepeats(res, b[j])) {
+				res[i] = b[j];
+				break;
+			}
+		}
+	}
+	res[nrOfPoints] = 0;
+	return res;
+}
+
 int Graph::simulatedAnnealing(double temperature, double coolingRate, double limit)
 {
 	vector<int> bestFoundPath = generateInitialPath();
@@ -418,4 +508,71 @@ int Graph::simulatedAnnealing(double temperature, double coolingRate, double lim
 		cout << bestFoundPath[i] + 1 << " ";
 	}
 	return bestFoundSolution;
+}
+
+bool cmp(pair<int, int> a, pair<int, int> b) {
+	return a.second < b.second;
+}
+
+
+int Graph::geneticAlgorithm(int generetions, int popSize, int eliteSize, int tournamentSize, int crossoverRate,int mutationRate)
+{
+	int bestSolution = 100000000000000;
+	random_device device;
+	mt19937 rng(device());
+	if (popSize < 1) return -1;
+	vector<vector<int>> initialPop = gaInitialPopulation(popSize);
+	pair<int, int> eval;
+
+	for (int i = 0; i < generetions; i++) {
+		//fitness
+		vector<pair<int, int>> e;
+		for (int i = 0; i < initialPop.size(); i++) {
+			eval = make_pair(i, tabuEvaluate(initialPop[i]));
+			e.push_back(eval);
+		}
+		sort(e.begin(), e.end(), cmp);
+
+		//mating pool
+		uniform_int_distribution<mt19937::result_type> matingRange(0, initialPop.size()-1);
+		vector<vector<int>> matingVec;
+		for (int k = 0; k < popSize-eliteSize; k++) {
+			vector<pair<int, int>> tourVec;
+			for (int j = 0; j < tournamentSize; j++) {
+				int point = matingRange(rng);
+				tourVec.push_back(e[point]);
+			}
+			sort(tourVec.begin(), tourVec.end(), cmp);
+			matingVec.push_back(initialPop[tourVec[0].first]);
+		}
+		for (int i = 0; i < eliteSize; i++) {
+			matingVec.push_back(initialPop[e[i].first]);
+		}
+
+
+		//crossover
+		vector<vector<int>> children;
+		for (int i = 0; i < popSize-eliteSize; i++) {
+			vector<int> child = gaCrossover(matingVec[i], matingVec[i + 1],crossoverRate);
+			children.push_back(child);
+		}
+		for (int i = popSize - eliteSize; i < popSize; i++) {
+			children.push_back(matingVec[i]);
+		}
+
+		//mutation
+		vector<vector<int>> mutatedVec;
+		for (int i = 0; i < popSize; i++) {
+			vector<int> mutation = gaMutate(children[i], mutationRate);
+			mutatedVec.push_back(mutation);
+		}
+		
+		//evaluate
+		for (int i = 0; i < mutatedVec.size(); i++) {
+			int r = tabuEvaluate(mutatedVec[i]);
+			if (r < bestSolution) bestSolution = r;
+		}
+		initialPop = mutatedVec;
+	}
+	return bestSolution;
 }

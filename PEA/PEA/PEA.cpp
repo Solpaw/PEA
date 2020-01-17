@@ -33,7 +33,6 @@ void mainMenu() {
 			case '5':
 
 				vector<string> names = { "data10","data11","data12","data13","data14","data15","data16","data18","data21","data24","data26","data34","data39","data43","data48","data56","data58","data65","data70","data100","data120","data171","data323","data358"};
-
 				ofstream file;
 				file.open("test.csv");
 				file << "Tabu Search\n";

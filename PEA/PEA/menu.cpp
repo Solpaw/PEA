@@ -7,7 +7,7 @@ using namespace std;
 
 void menu(Graph *graf)
 {
-	string menu = "0. Zakoncz\n1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Dynamic Programming\n6. Tabu Search\n7. Symulowane Wyzarzanie";
+	string menu = "0. Zakoncz\n1. Wyswietl graf\n2. Funkcja celu\n3. Brute Force\n4. Branch and Bound\n5. Dynamic Programming\n6. Tabu Search\n7. Symulowane Wyzarzanie\n8. Algorytm genetyczny";
 
 	bool exit = false;
 	while (!exit) {
@@ -50,6 +50,10 @@ void menu(Graph *graf)
 			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
 			_getch();
 			break;
+		case '8':
+			cout << endl << "Wynik Algorytmu Genetycznego: " << graf->geneticAlgorithm(500,200, 2,50,100,10);
+			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
+			_getch();
 		case '0':
 			exit = true;
 			break;

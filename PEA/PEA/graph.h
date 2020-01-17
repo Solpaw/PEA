@@ -13,6 +13,8 @@ class Graph
 	int nrOfPoints;
 	string name;
 	void bruteAlg(int x, vector<int>& path, int value, int* min, vector<int>& minPath);
+	void showPath(vector<int> bestFoundPath);
+	bool checkPathForRepeats(vector<int> vec,int num);
 	vector<vector<int>> branchMinMat(vector<vector<int>> arr, int row, int column);
 	int branchVal(vector<vector<int>> &arr);
 	int branchAlg(vector<vector<int>> arr, int startPoint, int endPoint);
@@ -23,6 +25,9 @@ class Graph
 	void updateTabuList(vector < TabuList> & tabuList);
 	vector<int> generateInitialPath();
 	void saAlg(vector<int> currentPath, int currentSolution, double temperature, double coolingRate, double limit, vector<int>& bestFoundPath, int& bestFoundSolution);
+	vector<vector<int>> gaInitialPopulation(int popSize);
+	vector<int> gaMutate(vector<int> a, int mutationRate);
+	vector<int> gaCrossover(vector<int> a, vector<int> b, int crossoverRate);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();
@@ -35,5 +40,6 @@ public:
 	int dynamicProgramming();
 	int tabuSearch(int maxCounter, int tabuCooldown);
 	int simulatedAnnealing(double temperature, double coolingRate, double limit);
+	int geneticAlgorithm(int generations, int popSize, int eliteSize, int tournamentSize, int crossoverRate, int mutationRate);
 };
 
