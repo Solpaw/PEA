@@ -50,10 +50,13 @@ void menu(Graph *graf)
 			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
 			_getch();
 			break;
-		case '8':
-			cout << endl << "Wynik Algorytmu Genetycznego: " << graf->geneticAlgorithm(500,200, 2,50,100,10);
+		case '8': {
+			int popSize = 500;
+			cout << endl << "Wynik Algorytmu Genetycznego: " << graf->geneticAlgorithm(popSize*5, popSize, popSize / 5, popSize / 2, 100, 5);
 			cout << endl << "nacisnij dowolny klawisz aby kontynuowac...";
 			_getch();
+		}
+			
 		case '0':
 			exit = true;
 			break;

@@ -517,21 +517,25 @@ bool cmp(pair<int, int> a, pair<int, int> b) {
 
 int Graph::geneticAlgorithm(int generetions, int popSize, int eliteSize, int tournamentSize, int crossoverRate,int mutationRate)
 {
-	int bestSolution = 100000000000000;
+	int c = 0;
+	int counter = 0;
+	int bestSolution = INT32_MAX;
 	random_device device;
 	mt19937 rng(device());
-	if (popSize < 1) return -1;
 	vector<vector<int>> initialPop = gaInitialPopulation(popSize);
-	pair<int, int> eval;
 
 	for (int i = 0; i < generetions; i++) {
+		if (counter > generetions / 6) {
+			initialPop = gaInitialPopulation(popSize);
+			counter = 0;
+			c++;
+		}
 		//fitness
 		vector<pair<int, int>> e;
 		for (int i = 0; i < initialPop.size(); i++) {
-			eval = make_pair(i, tabuEvaluate(initialPop[i]));
+			pair<int, int> eval = make_pair(i, tabuEvaluate(initialPop[i]));
 			e.push_back(eval);
 		}
-		sort(e.begin(), e.end(), cmp);
 
 		//mating pool
 		uniform_int_distribution<mt19937::result_type> matingRange(0, initialPop.size()-1);
@@ -545,34 +549,37 @@ int Graph::geneticAlgorithm(int generetions, int popSize, int eliteSize, int tou
 			sort(tourVec.begin(), tourVec.end(), cmp);
 			matingVec.push_back(initialPop[tourVec[0].first]);
 		}
+		sort(e.begin(), e.end(), cmp);
 		for (int i = 0; i < eliteSize; i++) {
 			matingVec.push_back(initialPop[e[i].first]);
 		}
 
 
 		//crossover
-		vector<vector<int>> children;
+		initialPop.clear();;
 		for (int i = 0; i < popSize-eliteSize; i++) {
 			vector<int> child = gaCrossover(matingVec[i], matingVec[i + 1],crossoverRate);
-			children.push_back(child);
+			initialPop.push_back(child);
 		}
 		for (int i = popSize - eliteSize; i < popSize; i++) {
-			children.push_back(matingVec[i]);
+			initialPop.push_back(matingVec[i]);
 		}
 
 		//mutation
-		vector<vector<int>> mutatedVec;
-		for (int i = 0; i < popSize; i++) {
-			vector<int> mutation = gaMutate(children[i], mutationRate);
-			mutatedVec.push_back(mutation);
+		for (int i = 0; i < popSize-eliteSize; i++) {
+			vector<int> mutation = gaMutate(initialPop[i], mutationRate);
+			initialPop[i]=mutation;
 		}
 		
 		//evaluate
-		for (int i = 0; i < mutatedVec.size(); i++) {
-			int r = tabuEvaluate(mutatedVec[i]);
-			if (r < bestSolution) bestSolution = r;
+		for (int i = 0; i < initialPop.size(); i++) {
+			int r = tabuEvaluate(initialPop[i]);
+			if (r < bestSolution) {
+				bestSolution = r;
+				counter = 0;
+			}
 		}
-		initialPop = mutatedVec;
+		counter++;
 	}
 	return bestSolution;
 }
