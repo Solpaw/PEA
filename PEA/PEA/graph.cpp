@@ -4,6 +4,8 @@
 #include <vector>
 #include "BabNode.h"
 #include <queue>
+#include <chrono>
+#include <random>
 using namespace std;
 
 
@@ -23,6 +25,16 @@ void Graph::showGraph()
 void Graph::insertNumber(int i, int j, int value)
 {
 	this->weightMatrix[i][j] = value;
+}
+
+int Graph::getNrOfPoints()
+{
+	return this->nrOfPoints;
+}
+
+string Graph::getName()
+{
+	return this->name;
 }
 
 int Graph::targetFunction()
@@ -82,6 +94,22 @@ void Graph::bruteAlg(int x, vector<int>& path, int value, int *min,vector<int>& 
 		}
 	}
 	return;
+}
+
+void Graph::showPath(vector<int> bestFoundPath)
+{
+	cout << endl;
+	for (int i = 0; i < bestFoundPath.size(); i++) {
+		cout << bestFoundPath[i] + 1 << " ";
+	}
+}
+
+bool Graph::checkPathForRepeats(vector<int> vec,int num)
+{
+	for (int i = 0; i < vec.size(); i++) {
+		if (vec[i] == num) return true;
+	}
+	return false;
 }
 
 //wykluczenie rzedu i kolumny
@@ -209,7 +237,6 @@ int Graph::dynamicProgramming()
 	return result[0];
 }
 
-
 vector<int> Graph::dynamicProgramming(int start, vector<int>& rem)
 {
 	vector<int> minPath;
@@ -252,4 +279,351 @@ vector<int> Graph::dynamicProgramming(int start, vector<int>& rem)
 		minPath[0] = weightMatrix[start][0];
 	}
 	return minPath;
+}
+
+int Graph::tabuEvaluate(vector<int> vec)
+{
+	int res = 0;
+	for (int i = 0; i < vec.size() - 1; i++) {
+		res += weightMatrix[vec[i]][vec[i + 1]];
+	}
+	return res;
+}
+
+void Graph::tabuAlg(vector<int> currentPath, int currentSolution, int counter, vector<TabuList>& tabuList,vector<int>&bestFoundPath,int&bestFoundSolution, int maxCounter, int tabuCooldown, int sinceLastImprovement)
+{
+	//sprawdzenie wyniku
+	if (bestFoundSolution > currentSolution) {
+		sinceLastImprovement = 0;
+		bestFoundPath = currentPath;
+		bestFoundSolution = currentSolution;
+	}
+	updateTabuList(tabuList);
+	//warunek konca
+	if (counter == maxCounter || sinceLastImprovement == maxCounter/3) return;
+	//wyznaczenie najlepszej zamiany
+	vector <int> nPath = currentPath;
+	int res, tabuX, tabuY, min = INT32_MAX, t;
+	for (int i = 1; i < currentPath.size() - 2; i++) {
+		for (int j = i + 1; j < currentPath.size() - 1; j++) {
+			nPath = currentPath;
+			t = nPath[i];
+			nPath[i] = nPath[j];
+			nPath[j] = t;
+			res = tabuEvaluate(nPath);
+			//jesli zamiana zakazana pomin
+			if (checkTabuList(tabuList, i, j) && res >= bestFoundSolution) continue;
+			if (res < min) {
+				min = res;
+				tabuX = i;
+				tabuY = j;
+			}
+		}
+	}
+	//wykonanie najlepszej zamiany
+	nPath = currentPath;
+	t = nPath[tabuX];
+	nPath[tabuX] = nPath[tabuY];
+	nPath[tabuY] = t;
+	//wpisanie zamiany do listy tabu
+	tabuList.push_back({ tabuX,tabuY,tabuCooldown });
+	//kontynuacja algorytmu z nowymi danymi
+	tabuAlg(nPath, min, counter + 1,tabuList,bestFoundPath,bestFoundSolution, maxCounter, tabuCooldown, sinceLastImprovement + 1);
+}
+
+bool Graph::checkTabuList(vector<TabuList>& tabuList,int x, int y)
+{
+
+	for (int i = 0; i < tabuList.size(); i++) {
+		if (tabuList[i].x == x && tabuList[i].y == y) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Graph::updateTabuList(vector<TabuList>& tabuList)
+{
+	for (int i = 0; i < tabuList.size(); i++) {
+		if (--tabuList[i].cooldown == 0) {
+			tabuList.erase(tabuList.begin() + i);
+			i--;
+		}
+	}
+}
+
+vector<int> Graph::generateInitialPath()
+{
+	vector<int> currentPath;
+	vector<bool> tab(nrOfPoints,false);
+	currentPath.push_back(0);
+	for (pair<int,int> i(0,0); i.first < nrOfPoints - 1; i.first++) {
+		int min = INT32_MAX;
+		for (int j = 1; j < nrOfPoints; j++) {
+			if (weightMatrix[currentPath[i.first]][j] < min && j != currentPath[i.first] && !tab[j]) {
+				min = weightMatrix[currentPath[i.first]][j];
+				i.second = j;
+			}
+		}
+		currentPath.push_back(i.second);
+		tab[i.second] = true;
+	}
+	currentPath.push_back(0);
+	return currentPath;
+}
+
+int Graph::tabuSearch(int maxCounter, int tabuCooldown)
+{
+	vector<TabuList> tabuList;
+	vector<int> bestFoundPath = generateInitialPath();
+	int bestFoundSolution = tabuEvaluate(bestFoundPath);
+	tabuAlg(bestFoundPath, bestFoundSolution,0,tabuList,bestFoundPath,bestFoundSolution,maxCounter,tabuCooldown,0);
+	cout << endl;
+	for (int i = 0; i < bestFoundPath.size(); i++) {
+		cout << bestFoundPath[i] +1 << " ";
+	}
+	return bestFoundSolution;
+}
+
+void Graph::saAlg(vector<int> currentPath, int currentSolution, double temperature, double coolingRate, double limit,vector<int>& bestFoundPath, int& bestFoundSolution)
+{
+	//sprawdzenie wyniku
+	if (bestFoundSolution > currentSolution) {
+bestFoundPath = currentPath;
+bestFoundSolution = currentSolution;
+	}
+	//przygotowanie funkcji losujacej
+	unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+	mt19937 gen(seed);
+	uniform_int_distribution<mt19937::result_type> dist;
+
+	while (temperature > 1) {
+		vector<int> nPath = currentPath;
+		//losowanie zamiany
+		int first = dist(gen) % (nrOfPoints - 1) + 1;
+		int second = dist(gen) % (nrOfPoints - 1) + 1;
+		while (first == second) {
+			second = dist(gen) % (nrOfPoints - 1) + 1;
+		}
+		//wykonanie zamiany
+		int t = nPath[first];
+		nPath[first] = nPath[second];
+		nPath[second] = t;
+		//sprawdzenie wyniku
+		t = tabuEvaluate(nPath);
+		if (t < currentSolution || (t - currentSolution) / temperature < limit) {
+			currentPath = nPath;
+			currentSolution = t;
+		}
+		if (currentSolution < bestFoundSolution) {
+			bestFoundPath = currentPath;
+			bestFoundSolution = currentSolution;
+		}
+		//zmniejszenie temperatury
+		temperature *= coolingRate;
+	}
+}
+
+vector<vector<int>> Graph::gaInitialPopulation(int popSize)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> range(1, nrOfPoints - 1);
+	vector<vector<int>> pop;
+	for (int i = 0; i < popSize; i++) {
+		vector<int> nPath;
+		nPath.push_back(0);
+		for (int i = 0; i < nrOfPoints - 1; i++) {
+			int point;
+			while (true) {
+				point = range(rng);
+				if (!checkPathForRepeats(nPath, point)) break;
+			}
+			nPath.push_back(point);
+		}
+		nPath.push_back(0);
+		pop.push_back(nPath);
+	}
+	return pop;
+}
+
+vector<int> Graph::gaMutate(vector<int> a,int mutationRate)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> mutation(0, 100);
+	if (mutation(rng) > mutationRate) return a;
+	uniform_int_distribution<mt19937::result_type> mutationRange(1, nrOfPoints - 1);
+	int start = mutationRange(rng);
+	int end = mutationRange(rng);
+	int temp = a[start];
+	a[start] = a[end];
+	a[end] = temp;
+	return a;
+}
+
+vector<int> Graph::gaCrossoverOX(vector<int> a, vector<int> b, int crossoverRate)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> crossover(0, 100);
+	if (crossover(rng) > crossoverRate) return a;
+	uniform_int_distribution<mt19937::result_type> crossoverRange(1, nrOfPoints-1);
+	vector<int> res(a.size(), -1);
+	int start = crossoverRange(rng);
+	int end = crossoverRange(rng);
+	if (end < start) {
+		int temp = start;
+		start = end;
+		end = temp;
+	}
+	for (int i = start; i <= end; i++) {
+		res[i] = a[i];
+	}
+	res[0] = 0;
+	int j = 1;
+	for (int i = 1; i < nrOfPoints;i++) {
+		if (res[i] != -1) continue;
+		for (int j = 1; j < nrOfPoints; j++) {
+			if (!checkPathForRepeats(res, b[j])) {
+				res[i] = b[j];
+				break;
+			}
+		}
+	}
+	res[nrOfPoints] = 0;
+	return res;
+}
+
+vector<int> Graph::gaCrossoverPMX(vector<int> p1, vector<int> p2, int crossoverRate)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> crossover(0, 100);
+	if (crossover(rng) > crossoverRate) return p1;
+	uniform_int_distribution<mt19937::result_type> crossoverRange(1, nrOfPoints - 1);
+
+	vector<int> res(p1.size(),-1);
+	vector<pair<int, int>> swaps;
+	int start = crossoverRange(rng);
+	int end = crossoverRange(rng);
+	if (end < start) {
+		int temp = start;
+		start = end;
+		end = temp;
+	}
+
+	for (int i = start; i <= end; i++) {
+		res[i] = p2[i];
+		swaps.push_back(make_pair(p1[i], p2[i]));
+	}
+	for (int i = 1; i < p1.size()-1; i++) {
+		if (i == start) i += swaps.size();
+		if (!checkPathForRepeats(res, p1[i])) {
+			res[i] = p1[i];
+		}
+		else {
+			bool found = false;
+			int t = p1[i];
+			while (!found) {
+				for (int k = 0; k < swaps.size(); k++) {
+					if (swaps[k].second == t) {
+						t = swaps[k].first;
+						break;
+					}
+				}
+				if (!checkPathForRepeats(res, t)) {
+					res[i] =t;
+					found = true;
+				}
+			}
+		}
+	}
+	res[0] = 0;
+	res[nrOfPoints] = 0;
+	return res;
+}
+
+int Graph::simulatedAnnealing(double temperature, double coolingRate, double limit)
+{
+	vector<int> bestFoundPath = generateInitialPath();
+	int bestFoundSolution = tabuEvaluate(bestFoundPath);
+	saAlg(bestFoundPath, bestFoundSolution, temperature, coolingRate, limit, bestFoundPath, bestFoundSolution);
+	cout << endl;
+	for (int i = 0; i < bestFoundPath.size(); i++) {
+		cout << bestFoundPath[i] + 1 << " ";
+	}
+	return bestFoundSolution;
+}
+
+bool cmp(pair<int, int> a, pair<int, int> b) {
+	return a.second < b.second;
+}
+
+int Graph::geneticAlgorithm(int generetions, int popSize, int eliteSize, int tournamentSize, int crossoverRate,int mutationRate)
+{
+	int counter = 0;
+	int bestSolution = INT32_MAX;
+	vector<int> bestPath;
+	random_device device;
+	mt19937 rng(device());
+	vector<vector<int>> population = gaInitialPopulation(popSize);
+
+	for (int i = 0; i < generetions; i++) {
+
+		//critical event
+		if (counter > generetions / 6) {
+			population = gaInitialPopulation(popSize);
+			counter = 0;
+		}
+		//fitness
+		vector<pair<int, int>> e;
+		for (int i = 0; i < population.size(); i++) {
+			e.push_back(make_pair(i, tabuEvaluate(population[i])));
+		}
+
+		//mating pool
+		uniform_int_distribution<mt19937::result_type> matingRange(0, population.size()-1);
+		vector<vector<int>> matingVec;
+		for (int k = 0; k < popSize-eliteSize; k++) {
+			vector<pair<int, int>> tourVec;
+			for (int j = 0; j < tournamentSize; j++) {
+				tourVec.push_back(e[matingRange(rng)]);
+			}
+			sort(tourVec.begin(), tourVec.end(), cmp);
+			matingVec.push_back(population[tourVec[0].first]);
+		}
+		sort(e.begin(), e.end(), cmp);
+		for (int i = 0; i < eliteSize; i++) {
+			matingVec.push_back(population[e[i].first]);
+		}
+
+
+		//crossover
+		population.clear();;
+		for (int i = 0; i < popSize-eliteSize; i++) {
+			population.push_back(gaCrossoverPMX(matingVec[i], matingVec[i + 1], crossoverRate));
+		}
+		for (int i = popSize - eliteSize; i < popSize; i++) {
+			population.push_back(matingVec[i]);
+		}
+
+		//mutation
+		for (int i = 0; i < popSize-eliteSize; i++) {
+			population[i]= gaMutate(population[i], mutationRate);
+		}
+		
+		//evaluate
+		for (int i = 0; i < population.size(); i++) {
+			int r = tabuEvaluate(population[i]);
+			if (r < bestSolution) {
+				bestSolution = r;
+				bestPath = population[i];
+				counter = 0;
+			}
+		}
+		counter++;
+	}
+	showPath(bestPath);
+	return bestSolution;
 }
