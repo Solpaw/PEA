@@ -462,17 +462,14 @@ vector<int> Graph::gaMutate(vector<int> a,int mutationRate)
 	return a;
 }
 
-vector<int> Graph::gaCrossover(vector<int> a, vector<int> b, int crossoverRate)
+vector<int> Graph::gaCrossoverOX(vector<int> a, vector<int> b, int crossoverRate)
 {
 	random_device device;
 	mt19937 rng(device());
 	uniform_int_distribution<mt19937::result_type> crossover(0, 100);
 	if (crossover(rng) > crossoverRate) return a;
 	uniform_int_distribution<mt19937::result_type> crossoverRange(1, nrOfPoints-1);
-	vector<int> res;
-	for (int i = 0; i < nrOfPoints + 1; i++) {
-		res.push_back(-1);
-	}
+	vector<int> res(a.size(), -1);
 	int start = crossoverRange(rng);
 	int end = crossoverRange(rng);
 	if (end < start) {
@@ -498,6 +495,55 @@ vector<int> Graph::gaCrossover(vector<int> a, vector<int> b, int crossoverRate)
 	return res;
 }
 
+vector<int> Graph::gaCrossoverPMX(vector<int> p1, vector<int> p2, int crossoverRate)
+{
+	random_device device;
+	mt19937 rng(device());
+	uniform_int_distribution<mt19937::result_type> crossover(0, 100);
+	if (crossover(rng) > crossoverRate) return p1;
+	uniform_int_distribution<mt19937::result_type> crossoverRange(1, nrOfPoints - 1);
+
+	vector<int> res(p1.size(),-1);
+	vector<pair<int, int>> swaps;
+	int start = crossoverRange(rng);
+	int end = crossoverRange(rng);
+	if (end < start) {
+		int temp = start;
+		start = end;
+		end = temp;
+	}
+
+	for (int i = start; i <= end; i++) {
+		res[i] = p2[i];
+		swaps.push_back(make_pair(p1[i], p2[i]));
+	}
+	for (int i = 1; i < p1.size()-1; i++) {
+		if (i == start) i += swaps.size();
+		if (!checkPathForRepeats(res, p1[i])) {
+			res[i] = p1[i];
+		}
+		else {
+			bool found = false;
+			int t = p1[i];
+			while (!found) {
+				for (int k = 0; k < swaps.size(); k++) {
+					if (swaps[k].second == t) {
+						t = swaps[k].first;
+						break;
+					}
+				}
+				if (!checkPathForRepeats(res, t)) {
+					res[i] =t;
+					found = true;
+				}
+			}
+		}
+	}
+	res[0] = 0;
+	res[nrOfPoints] = 0;
+	return res;
+}
+
 int Graph::simulatedAnnealing(double temperature, double coolingRate, double limit)
 {
 	vector<int> bestFoundPath = generateInitialPath();
@@ -514,72 +560,70 @@ bool cmp(pair<int, int> a, pair<int, int> b) {
 	return a.second < b.second;
 }
 
-
 int Graph::geneticAlgorithm(int generetions, int popSize, int eliteSize, int tournamentSize, int crossoverRate,int mutationRate)
 {
-	int c = 0;
 	int counter = 0;
 	int bestSolution = INT32_MAX;
+	vector<int> bestPath;
 	random_device device;
 	mt19937 rng(device());
-	vector<vector<int>> initialPop = gaInitialPopulation(popSize);
+	vector<vector<int>> population = gaInitialPopulation(popSize);
 
 	for (int i = 0; i < generetions; i++) {
+
+		//critical event
 		if (counter > generetions / 6) {
-			initialPop = gaInitialPopulation(popSize);
+			population = gaInitialPopulation(popSize);
 			counter = 0;
-			c++;
 		}
 		//fitness
 		vector<pair<int, int>> e;
-		for (int i = 0; i < initialPop.size(); i++) {
-			pair<int, int> eval = make_pair(i, tabuEvaluate(initialPop[i]));
-			e.push_back(eval);
+		for (int i = 0; i < population.size(); i++) {
+			e.push_back(make_pair(i, tabuEvaluate(population[i])));
 		}
 
 		//mating pool
-		uniform_int_distribution<mt19937::result_type> matingRange(0, initialPop.size()-1);
+		uniform_int_distribution<mt19937::result_type> matingRange(0, population.size()-1);
 		vector<vector<int>> matingVec;
 		for (int k = 0; k < popSize-eliteSize; k++) {
 			vector<pair<int, int>> tourVec;
 			for (int j = 0; j < tournamentSize; j++) {
-				int point = matingRange(rng);
-				tourVec.push_back(e[point]);
+				tourVec.push_back(e[matingRange(rng)]);
 			}
 			sort(tourVec.begin(), tourVec.end(), cmp);
-			matingVec.push_back(initialPop[tourVec[0].first]);
+			matingVec.push_back(population[tourVec[0].first]);
 		}
 		sort(e.begin(), e.end(), cmp);
 		for (int i = 0; i < eliteSize; i++) {
-			matingVec.push_back(initialPop[e[i].first]);
+			matingVec.push_back(population[e[i].first]);
 		}
 
 
 		//crossover
-		initialPop.clear();;
+		population.clear();;
 		for (int i = 0; i < popSize-eliteSize; i++) {
-			vector<int> child = gaCrossover(matingVec[i], matingVec[i + 1],crossoverRate);
-			initialPop.push_back(child);
+			population.push_back(gaCrossoverPMX(matingVec[i], matingVec[i + 1], crossoverRate));
 		}
 		for (int i = popSize - eliteSize; i < popSize; i++) {
-			initialPop.push_back(matingVec[i]);
+			population.push_back(matingVec[i]);
 		}
 
 		//mutation
 		for (int i = 0; i < popSize-eliteSize; i++) {
-			vector<int> mutation = gaMutate(initialPop[i], mutationRate);
-			initialPop[i]=mutation;
+			population[i]= gaMutate(population[i], mutationRate);
 		}
 		
 		//evaluate
-		for (int i = 0; i < initialPop.size(); i++) {
-			int r = tabuEvaluate(initialPop[i]);
+		for (int i = 0; i < population.size(); i++) {
+			int r = tabuEvaluate(population[i]);
 			if (r < bestSolution) {
 				bestSolution = r;
+				bestPath = population[i];
 				counter = 0;
 			}
 		}
 		counter++;
 	}
+	showPath(bestPath);
 	return bestSolution;
 }

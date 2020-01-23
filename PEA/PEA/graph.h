@@ -27,7 +27,8 @@ class Graph
 	void saAlg(vector<int> currentPath, int currentSolution, double temperature, double coolingRate, double limit, vector<int>& bestFoundPath, int& bestFoundSolution);
 	vector<vector<int>> gaInitialPopulation(int popSize);
 	vector<int> gaMutate(vector<int> a, int mutationRate);
-	vector<int> gaCrossover(vector<int> a, vector<int> b, int crossoverRate);
+	vector<int> gaCrossoverOX(vector<int> a, vector<int> b, int crossoverRate);
+	vector<int> gaCrossoverPMX(vector<int> a, vector<int>b, int crossoverRate);
 public:
 	Graph(int nrOfPoints, string name);
 	void showGraph();
